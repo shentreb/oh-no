@@ -1,99 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SafePaws - Driver</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-body{margin:0;font-family:'Poppins',sans-serif;background:#F5F7FA;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
-.card{width:100%;max-width:420px;background:#fff;padding:24px;border-radius:20px;box-shadow:0 8px 20px rgba(0,0,0,.08)}
-h2{margin:0 0 16px;color:#0F172A;font-weight:700;text-align:center}
-input,button{width:100%;padding:12px;margin:8px 0;border-radius:12px;border:1px solid #E5E7EB;font-size:15px;box-sizing:border-box}
-button{background:#0EA5E9;color:#fff;font-weight:600;border:0;cursor:pointer}
-.hidden{display:none}
-.item{border:1px solid #E5E7EB;border-radius:12px;padding:12px;margin:8px 0}
-#map{height:300px;border-radius:12px;margin-top:8px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafePaws Driver</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+  <style> body { font-family: 'Inter', sans-serif; } </style>
 </head>
-<body>
-<div class="card">
-  <h2>SafePaws Driver</h2>
-  <div id="auth">
-    <input id="email" type="email" placeholder="Driver Email">
-    <input id="pass" type="password" placeholder="Password">
-    <button id="btnLogin">Sign In</button>
-  </div>
-
-  <div id="app" class="hidden">
-    <button id="btnLogout">Logout</button>
-    <button id="btnLoc">Share My Location 📍</button>
-    <h3>New Jobs</h3>
-    <div id="jobs"></div>
-    <div id="activeJob" class="hidden">
-      <h3>Active Job</h3>
-      <div id="jobDetails"></div>
-      <div id="map"></div>
-      <button id="btnArrived">Arrived</button>
-      <button id="btnDone">Complete</button>
+<body class="bg-teal-50 min-h-screen p-4">
+  <div class="w-full max-w-lg mx-auto bg-white rounded-2xl shadow-lg p-8">
+    <h1 class="text-3xl font-extrabold text-center text-teal-600 mb-6">Driver Dashboard</h1>
+    <div id="bookings-list" class="space-y-4"></div>
+    <div class="grid grid-cols-2 gap-3 mt-6">
+      <a href="admin.html" class="text-center bg-teal-600 text-white p-3 rounded-lg hover:bg-teal-700 transition">Admin Panel</a>
+      <a href="clinic.html" class="text-center bg-teal-500 text-white p-3 rounded-lg hover:bg-teal-600 transition">Clinic Panel</a>
     </div>
+    <a href="index.html" class="block text-center mt-4 text-red-600 font-semibold hover:text-red-700">Logout</a>
   </div>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {apiKey: "AIzaSyBVaqhNCrgDlWGEVjXygszJUdQR_bpG7os",authDomain: "ILAGAY_MO_AUTH_DOMAIN",projectId: "ILAGAY_MO_PROJECT_ID",storageBucket: "ILAGAY_MO_STORAGE_BUCKET",messagingSenderId: "ILAGAY_MO_SENDER_ID",appId: "ILAGAY_MO_APP_ID"};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const $ = id => document.getElementById(id);
-const show = (el, on) => el.classList.toggle('hidden',!on);
-
-let map, driverMarker, jobMarker, watchId, activeId=null;
-
-onAuthStateChanged(auth, async u => {
-  show($('auth'),!u); show($('app'),!!u);
-  if(u){ loadJobs(); }
-});
-
-$('btnLogin').onclick = () => signInWithEmailAndPassword(auth, $('email').value, $('pass').value);
-$('btnLogout').onclick = () => signOut(auth);
-
-$('btnLoc').onclick = () => {
-  if(!navigator.geolocation) return alert('No GPS');
-  if(watchId) navigator.geolocation.clearWatch(watchId);
-  watchId = navigator.geolocation.watchPosition(p=>{
-    const {latitude:lat, longitude:lng} = p.coords;
-    setDoc(doc(db,'drivers',auth.currentUser.uid),{lat,lng,name:auth.currentUser.email},{merge:true});
-    if(map){ if(driverMarker) driverMarker.setLatLng([lat,lng]); else driverMarker=L.marker([lat,lng]).addTo(map).bindPopup('You'); map.setView([lat,lng],14); }
-  });
-};
-
-function loadJobs(){
-  onSnapshot(query(collection(db,'bookings'), where('status','==','pending')), snap => {
-    $('jobs').innerHTML = snap.empty?'<small>No jobs</small>':snap.docs.map(d=>`<div class="item"><b>${d.data().petName}</b> ${d.data().weightKg}kg ${d.data().isEmergency?'🚨':''}<br><small>${d.data().medical||''}<br>${d.data().shop||''}</small><br><button onclick="accept('${d.id}')">Accept</button></div>`).join('');
-  });
-}
-window.accept = async id => {
-  await updateDoc(doc(db,'bookings',id),{status:'accepted',driverId:auth.currentUser.uid});
-  activeId=id; show($('activeJob'),true); show($('jobs'),false);
-  const d = (await getDoc(doc(db,'bookings',id))).data();
-  $('jobDetails').innerHTML=`<b>${d.petName}</b> ${d.weightKg}kg<br>Medical: ${d.medical||'None'}<br>To: ${d.shop} ${d.isEmergency?'🚨':''}`;
-  initMap();
-  if(d.lat&&d.lng){ jobMarker=L.marker([d.lat,d.lng]).addTo(map).bindPopup('Pickup'); }
-};
-
-function initMap(){
-  if(map) return;
-  map = L.map('map').setView([14.5995,120.9842],13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-}
-
-$('btnArrived').onclick = () => updateDoc(doc(db,'bookings',activeId),{status:'arrived'});
-$('btnDone').onclick = async () => { await updateDoc(doc(db,'bookings',activeId),{status:'done'}); activeId=null; show($('activeJob'),false); show($('jobs'),true); if(map){map.remove(); map=null;} };
-</script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1
+  <script type="module">
+    const firebaseConfig = { apiKey: "AIzaSyBVaqhNCrgDlWGEVjXygszJUdQR_bpG7os", authDomain: "safepaws-batangas.firebaseapp.com", projectId: "safepaws-batangas", storageBucket: "safepaws-batangas.firebasestorage.app", messagingSenderId: "629904615191", appId: "1:629904615191:web:45f7148d65ba61a867f952" };
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+    const listEl = document.getElementById('bookings-list');
+    onAuthStateChanged(auth, (user) => {
+      if (!user) { window.location.href = 'index.html'; return; }
+      const q = query(collection(db, "bookings"), orderBy("createdAt", "desc"));
+      onSnapshot(q, (snapshot) => {
+        listEl.innerHTML = '';
+        if (snapshot.empty) { listEl.innerHTML = '<p class="text-center text-gray-500">No bookings found.</p>'; return; }
+        snapshot.forEach(doc => {
+          const b = doc.data();
+          listEl.innerHTML += `<div class="bg-teal-50 p-4 rounded-lg border-teal-200"><p class="font-bold text-lg text-teal-800">${b.petName}</p><p class="text-sm text-gray-700">Type: ${b.petType || 'N/A'} | Weight: ${b.weightClass || 'N/A'}</p><p class="text-sm text-gray-700">Medical: ${b.medicalHistory || 'None'}</p><p class="text-sm text-gray-600 mt-1">From: ${b.pickup}</p><p class="text-sm text-gray-600">To: ${b.dropoff}</p><p class="text-xs mt-2 font-semibold text-teal-600 uppercase">Status: ${b.status}</p></div>`;
+        });
+      });
+    });
+  </script>
+</body>
+</html>
