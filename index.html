@@ -3,52 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SafePaws | User</title>
+  <title>SafePaws | Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; }
     #map { height: 300px; border-radius: 0.75rem; z-index: 0; }
+    .hidden { display: none; }
   </style>
 </head>
 <body class="bg-teal-50 min-h-screen p-4">
   <div class="w-full max-w-lg mx-auto bg-white rounded-2xl shadow-lg p-8">
-    <h1 class="text-3xl font-extrabold text-center text-teal-600 mb-6">Book Pet Transport</h1>
 
-    <h2 class="text-lg font-bold mb-2 text-gray-800">Pet Details</h2>
-    <input id="pet-name" type="text" placeholder="Pet Name" class="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-    <select id="pet-type" class="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-      <option value="">Pet Type</option>
-      <option value="Dog">Dog</option>
-      <option value="Cat">Cat</option>
-      <option value="Other">Other</option>
-    </select>
-    <select id="weight" class="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-      <option value="Small">Small - Base ₱150</option>
-      <option value="Medium">Medium - Base ₱200</option>
-      <option value="Large">Large - Base ₱250</option>
-    </select>
-    <textarea id="medical" placeholder="Medical History Notes. +₱100 if any" rows="2" class="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
-
-    <h2 class="text-lg font-bold mb-2 mt-4 text-gray-800">Pickup & Dropoff</h2>
-    <input id="pickup" type="text" placeholder="Pickup Address" class="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-    <input id="dropoff" type="text" placeholder="Dropoff Address" class="w-full p-3 mb-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-    <button id="calc-btn" class="w-full bg-gray-600 text-white font-semibold p-2 rounded-lg mb-3 hover:bg-gray-700 transition">Calculate Distance & Fare</button>
-
-    <p id="km-text" class="text-center text-gray-700 font-semibold">Distance: 0.0 km</p>
-    <p id="price-estimate" class="text-center text-xl font-extrabold text-teal-700 mb-2">Estimated Fare: ₱150</p>
-    <p class="text-sm text-gray-600 mb-2 text-center">Map: TEAL Pin = Clinic/Grooming Location</p>
-    <div id="map" class="mb-4"></div>
-
-    <button id="book-btn" class="w-full bg-teal-600 text-white font-bold p-3 rounded-lg hover:bg-teal-700 transition">Book Now</button>
-    <p id="book-status" class="text-center mt-4 font-semibold"></p>
-
-    <div class="grid grid-cols-2 gap-3 mt-4">
-      <a href="driver.html" class="text-center bg-gray-700 text-white p-3 rounded-lg hover:bg-gray-800 transition">Driver View</a>
-      <a href="clinic.html" class="text-center bg-teal-500 text-white p-3 rounded-lg hover:bg-teal-600 transition">Clinic View</a>
+    <!-- 1. LOGIN/SIGNUP VIEW -->
+    <div id="auth-view">
+      <h1 class="text-3xl font-extrabold text-center text-teal-600 mb-6">SafePaws Login</h1>
+      <input id="email" type="email" placeholder="Email" class="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+      <input id="password" type="password" placeholder="Password" class="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+      <button id="login-btn" class="w-full bg-teal-600 text-white font-bold p-3 rounded-lg hover:bg-teal-700 transition mb-2">Login</button>
+      <button id="signup-btn" class="w-full bg-gray-600 text-white font-bold p-3 rounded-lg hover:bg-gray-700 transition">Sign Up</button>
+      <p id="auth-status" class="text-center mt-4 font-semibold"></p>
     </div>
-    <a href="#" id="logout" class="block text-center mt-4 text-red-600 font-semibold hover:text-red-700">Logout</a>
+
+    <!-- 2. BOOKING VIEW -->
+    <div id="booking-view" class="hidden">
+      <h1 class="text-3xl font-extrabold text-center text-teal-600 mb-6">Book Pet Transport</h1>
+      <h2 class="text-lg font-bold mb-2 text-gray-800">Pet Details</h2>
+      <input id="pet-name" type="text" placeholder="Pet Name" class="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+      <select id="pet-type" class="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+        <option value="">Pet Type</option><option value="Dog">Dog</option><option value="Cat">Cat</option><option value="Other">Other</option>
+      </select>
+      <select id="weight" class="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+        <option value="Small">Small - Base ₱150</option><option value="Medium">Medium - Base ₱200</option><option value="Large">Large - Base ₱250</option>
+      </select>
+      <textarea id="medical" placeholder="Medical History Notes. +₱100 if any" rows="2" class="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+      <h2 class="text-lg font-bold mb-2 mt-4 text-gray-800">Pickup & Dropoff</h2>
+      <input id="pickup" type="text" placeholder="Pickup Address" class="w-full p-3 mb-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+      <input id="dropoff" type="text" placeholder="Dropoff Address" class="w-full p-3 mb-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+      <button id="calc-btn" class="w-full bg-gray-600 text-white font-semibold p-2 rounded-lg mb-3 hover:bg-gray-700 transition">Calculate Distance & Fare</button>
+      <p id="km-text" class="text-center text-gray-700 font-semibold">Distance: 0.0 km</p>
+      <p id="price-estimate" class="text-center text-xl font-extrabold text-teal-700 mb-2">Estimated Fare: ₱150</p>
+      <p class="text-sm text-gray-600 mb-2 text-center">Map: TEAL Pin = Clinic/Grooming Location</p>
+      <div id="map" class="mb-4"></div>
+      <button id="book-btn" class="w-full bg-teal-600 text-white font-bold p-3 rounded-lg hover:bg-teal-700 transition">Book Now</button>
+      <p id="book-status" class="text-center mt-4 font-semibold"></p>
+      <div class="grid grid-cols-2 gap-3 mt-4">
+        <a href="driver.html" class="text-center bg-gray-700 text-white p-3 rounded-lg hover:bg-gray-800 transition">Driver View</a>
+        <a href="clinic.html" class="text-center bg-teal-500 text-white p-3 rounded-lg hover:bg-teal-600 transition">Clinic View</a>
+      </div>
+      <a href="#" id="logout" class="block text-center mt-4 text-red-600 font-semibold hover:text-red-700">Logout</a>
+    </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -63,13 +68,15 @@
     };
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    const authView = document.getElementById('auth-view');
+    const bookingView = document.getElementById('booking-view');
     let pickupCoords = null;
     let dropoffCoords = null;
     let routeLine = null;
@@ -80,6 +87,51 @@
     const priceEl = document.getElementById('price-estimate');
     const kmEl = document.getElementById('km-text');
 
+    // AUTH LOGIC
+    document.getElementById('login-btn').addEventListener('click', async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const statusEl = document.getElementById('auth-status');
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        statusEl.textContent = 'Login Success';
+        statusEl.className = 'text-center mt-4 text-green-600 font-semibold';
+      } catch (e) {
+        statusEl.textContent = 'Error: ' + e.message;
+        statusEl.className = 'text-center mt-4 text-red-600 font-semibold';
+      }
+    });
+
+    document.getElementById('signup-btn').addEventListener('click', async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const statusEl = document.getElementById('auth-status');
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        statusEl.textContent = 'Account Created. Logged In.';
+        statusEl.className = 'text-center mt-4 text-green-600 font-semibold';
+      } catch (e) {
+        statusEl.textContent = 'Error: ' + e.message;
+        statusEl.className = 'text-center mt-4 text-red-600 font-semibold';
+      }
+    });
+
+    // SHOW/HIDE VIEWS
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        authView.classList.add('hidden');
+        bookingView.classList.remove('hidden');
+      } else {
+        authView.classList.remove('hidden');
+        bookingView.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('logout').addEventListener('click', (e) => {
+      e.preventDefault(); signOut(auth);
+    });
+
+    // BOOKING LOGIC - SAME LANG SA DATI
     async function geocode(address) {
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
       const res = await fetch(url);
@@ -109,15 +161,12 @@
       const pickup = document.getElementById('pickup').value.trim();
       const dropoff = document.getElementById('dropoff').value.trim();
       if (!pickup || !dropoff) { alert('Enter Pickup and Dropoff first'); return; }
-
       pickupCoords = await geocode(pickup);
       dropoffCoords = await geocode(dropoff);
       if (!pickupCoords || !dropoffCoords) { alert('Address not found'); return; }
-
       distanceKM = haversine(pickupCoords, dropoffCoords);
       kmEl.textContent = `Distance: ${distanceKM.toFixed(1)} km`;
       calculatePrice();
-
       if (routeLine) { map.removeLayer(routeLine); }
       routeLine = L.polyline([pickupCoords, dropoffCoords], {color: 'teal'}).addTo(map);
       map.fitBounds([pickupCoords, dropoffCoords]);
@@ -145,8 +194,6 @@
       } catch (e) { console.log("Clinic pin error:", e); }
     }
     loadClinicPin();
-
-    onAuthStateChanged(auth, (user) => { if (!user) { window.location.href = 'index.html'; } });
 
     document.getElementById('book-btn').addEventListener('click', async () => {
       const petName = document.getElementById('pet-name').value.trim();
@@ -179,10 +226,6 @@
         statusEl.textContent = 'Error: ' + e.message;
         statusEl.className = 'text-center mt-4 text-red-600 font-semibold';
       }
-    });
-
-    document.getElementById('logout').addEventListener('click', (e) => {
-      e.preventDefault(); signOut(auth).then(() => window.location.href = 'index.html');
     });
   </script>
 </body>
